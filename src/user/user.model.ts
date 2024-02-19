@@ -16,4 +16,9 @@ export const UserSchema = new Schema({
   },
 })
 
-export type UserModel = typeof UserSchema
+export type UserModel = {
+  _id: string
+  name: string
+  email: string
+  password: string
+}
