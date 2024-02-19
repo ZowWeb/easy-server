@@ -21,7 +21,7 @@
     "prepare": "husky"
   },
   "lint-staged": {
-    "(?!dist)**/*.{ts}": [
+    "(?!dist)**/*.ts": [
       "eslint"
     ]
   },
