@@ -7,6 +7,9 @@ import { CreateUserDTO, LoginUserDTO } from './dto/user.dto'
 import { UserModel } from './user.model'
 import { JwtService } from '@nestjs/jwt'
 import { getErrorMessage } from 'utils/error'
+import { Response } from 'express'
+
+const JWT_EXPIRES_IN = 60 * 2
 
 @Injectable()
 export class UserService {
@@ -15,7 +18,7 @@ export class UserService {
     private jwtService: JwtService,
   ) {}
 
-  async createUser(user: CreateUserDTO) {
+  async createUser(user: CreateUserDTO, res: Response) {
     try {
       const { password, ...rest } = user
       const hashedPwd = await bcrypt.hash(password, 10)
@@ -26,28 +29,28 @@ export class UserService {
       const savedUser = await newUser.save()
 
       const token = this.jwtService.sign(
-        { email: savedUser.email },
+        { email: savedUser.email, name: savedUser.name },
         {
-          secret: 'secret',
-          expiresIn: '3d',
+          secret: process.env.JWT_SECRET,
+          expiresIn: JWT_EXPIRES_IN,
         },
       )
 
-      return { token }
+      return res.status(201).json({ token, expiresIn: JWT_EXPIRES_IN })
     } catch (e) {
       console.error(`[createUser] catch:`, e)
 
-      return getErrorMessage(e)
+      return res.status(400).json(getErrorMessage(e))
     }
   }
 
-  async findOne(email: string): Promise<UserModel> {
+  async findOneByEmail(email: string): Promise<UserModel> {
     return await this.userModel.findOne({ email })
   }
 
-  async signInUser(user: LoginUserDTO) {
+  async signInUser(user: LoginUserDTO, res: Response) {
     const { email, password } = user
-    const foundUser = await this.findOne(email)
+    const foundUser = await this.findOneByEmail(email)
     if (!foundUser) {
       throw new UnauthorizedException('Email does not exist!')
     }
@@ -57,11 +60,11 @@ export class UserService {
       throw new UnauthorizedException('Password is incorrect!')
     }
 
-    const payload = { email: foundUser.email }
+    const payload = { email: foundUser.email, name: foundUser.name }
     const token = this.jwtService.sign(payload, {
-      secret: 'secret',
-      expiresIn: '3d',
+      secret: process.env.JWT_SECRET,
+      expiresIn: JWT_EXPIRES_IN,
     })
-    return { token }
+    return res.status(200).json({ token, expiresIn: JWT_EXPIRES_IN })
   }
 }

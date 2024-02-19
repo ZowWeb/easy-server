@@ -20,26 +20,28 @@ let UserController = class UserController {
     constructor(userService) {
         this.userService = userService;
     }
-    async signUpUser(user) {
-        return await this.userService.createUser(user);
+    async signUpUser(user, res) {
+        return await this.userService.createUser(user, res);
     }
-    async signInUser(user) {
-        return await this.userService.signInUser(user);
+    async signInUser(user, res) {
+        return await this.userService.signInUser(user, res);
     }
 };
 exports.UserController = UserController;
 __decorate([
     (0, common_1.Post)('signup'),
     __param(0, (0, common_1.Body)(common_1.ValidationPipe)),
+    __param(1, (0, common_1.Res)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [user_dto_1.CreateUserDTO]),
+    __metadata("design:paramtypes", [user_dto_1.CreateUserDTO, Object]),
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "signUpUser", null);
 __decorate([
     (0, common_1.Post)('signin'),
     __param(0, (0, common_1.Body)()),
+    __param(1, (0, common_1.Res)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [user_dto_1.LoginUserDTO]),
+    __metadata("design:paramtypes", [user_dto_1.LoginUserDTO, Object]),
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "signInUser", null);
 exports.UserController = UserController = __decorate([

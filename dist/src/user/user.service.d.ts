@@ -26,18 +26,12 @@ import { Model } from 'mongoose';
 import { CreateUserDTO, LoginUserDTO } from './dto/user.dto';
 import { UserModel } from './user.model';
 import { JwtService } from '@nestjs/jwt';
+import { Response } from 'express';
 export declare class UserService {
     private readonly userModel;
     private jwtService;
     constructor(userModel: Model<UserModel>, jwtService: JwtService);
-    createUser(user: CreateUserDTO): Promise<{
-        error: string;
-        message: string;
-    } | {
-        token: string;
-    }>;
-    findOne(email: string): Promise<UserModel>;
-    signInUser(user: LoginUserDTO): Promise<{
-        token: string;
-    }>;
+    createUser(user: CreateUserDTO, res: Response): Promise<Response<any, Record<string, any>>>;
+    findOneByEmail(email: string): Promise<UserModel>;
+    signInUser(user: LoginUserDTO, res: Response): Promise<Response<any, Record<string, any>>>;
 }

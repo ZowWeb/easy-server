@@ -20,7 +20,7 @@ let AuthService = class AuthService {
         this.userService = userService;
     }
     async validateUser(payload) {
-        const user = await this.userService.findOne(payload.email);
+        const user = await this.userService.findOneByEmail(payload.email);
         if (user.password !== payload.password) {
             throw new common_1.UnauthorizedException('Password not correct!');
         }

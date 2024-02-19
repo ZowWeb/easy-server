@@ -11,7 +11,7 @@ export class AuthService {
   ) {}
 
   async validateUser(payload: JwtPayload) {
-    const user = await this.userService.findOne(payload.email)
+    const user = await this.userService.findOneByEmail(payload.email)
     if (user.password !== payload.password) {
       throw new UnauthorizedException('Password not correct!')
     }

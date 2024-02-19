@@ -42,12 +42,13 @@ const mongoose_2 = require("mongoose");
 const bcrypt = __importStar(require("bcrypt"));
 const jwt_1 = require("@nestjs/jwt");
 const error_1 = require("../../utils/error");
+const JWT_EXPIRES_IN = 60 * 2;
 let UserService = class UserService {
     constructor(userModel, jwtService) {
         this.userModel = userModel;
         this.jwtService = jwtService;
     }
-    async createUser(user) {
+    async createUser(user, res) {
         try {
             const { password, ...rest } = user;
             const hashedPwd = await bcrypt.hash(password, 10);
@@ -56,23 +57,23 @@ let UserService = class UserService {
                 password: hashedPwd,
             });
             const savedUser = await newUser.save();
-            const token = this.jwtService.sign({ email: savedUser.email }, {
-                secret: 'secret',
-                expiresIn: '3d',
+            const token = this.jwtService.sign({ email: savedUser.email, name: savedUser.name }, {
+                secret: process.env.JWT_SECRET,
+                expiresIn: JWT_EXPIRES_IN,
             });
-            return { token };
+            return res.status(201).json({ token, expiresIn: JWT_EXPIRES_IN });
         }
         catch (e) {
             console.error(`[createUser] catch:`, e);
-            return (0, error_1.getErrorMessage)(e);
+            return res.status(400).json((0, error_1.getErrorMessage)(e));
         }
     }
-    async findOne(email) {
+    async findOneByEmail(email) {
         return await this.userModel.findOne({ email });
     }
-    async signInUser(user) {
+    async signInUser(user, res) {
         const { email, password } = user;
-        const foundUser = await this.findOne(email);
+        const foundUser = await this.findOneByEmail(email);
         if (!foundUser) {
             throw new common_1.UnauthorizedException('Email does not exist!');
         }
@@ -80,12 +81,12 @@ let UserService = class UserService {
         if (!isMatch) {
             throw new common_1.UnauthorizedException('Password is incorrect!');
         }
-        const payload = { email: foundUser.email };
+        const payload = { email: foundUser.email, name: foundUser.name };
         const token = this.jwtService.sign(payload, {
-            secret: 'secret',
-            expiresIn: '3d',
+            secret: process.env.JWT_SECRET,
+            expiresIn: JWT_EXPIRES_IN,
         });
-        return { token };
+        return res.status(200).json({ token, expiresIn: JWT_EXPIRES_IN });
     }
 };
 exports.UserService = UserService;
