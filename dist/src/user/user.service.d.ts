@@ -31,14 +31,10 @@ export declare class UserService {
     private jwtService;
     constructor(userModel: Model<UserModel>, jwtService: JwtService);
     createUser(user: CreateUserDTO): Promise<{
-        token: string;
-        error?: undefined;
+        error: string;
+        message: string;
     } | {
-        error: {
-            error: string;
-            message: string;
-        };
-        token?: undefined;
+        token: string;
     }>;
     findOne(email: string): Promise<UserModel>;
     signInUser(user: LoginUserDTO): Promise<{

@@ -11,6 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.LoginUserDTO = exports.CreateUserDTO = void 0;
 const class_validator_1 = require("class-validator");
+const regex_1 = require("../../../utils/regex");
 class CreateUserDTO {
 }
 exports.CreateUserDTO = CreateUserDTO;
@@ -25,6 +26,9 @@ __decorate([
 ], CreateUserDTO.prototype, "email", void 0);
 __decorate([
     (0, class_validator_1.IsString)(),
+    (0, class_validator_1.Matches)(regex_1.PwdRegex, {
+        message: 'Password must be at least 8 characters long and contain at least one letter, one number and one special character',
+    }),
     __metadata("design:type", String)
 ], CreateUserDTO.prototype, "password", void 0);
 class LoginUserDTO {

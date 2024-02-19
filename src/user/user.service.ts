@@ -1,6 +1,5 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
-import omit from 'lodash/omit'
 import { Model } from 'mongoose'
 import * as bcrypt from 'bcrypt'
 
@@ -18,10 +17,10 @@ export class UserService {
 
   async createUser(user: CreateUserDTO) {
     try {
-      const { password } = user
+      const { password, ...rest } = user
       const hashedPwd = await bcrypt.hash(password, 10)
       const newUser = new this.userModel({
-        ...omit(user, ['password']),
+        ...rest,
         password: hashedPwd,
       })
       const savedUser = await newUser.save()
@@ -38,8 +37,7 @@ export class UserService {
     } catch (e) {
       console.error(`[createUser] catch:`, e)
 
-      const msg = getErrorMessage(e)
-      return { error: msg }
+      return getErrorMessage(e)
     }
   }
 

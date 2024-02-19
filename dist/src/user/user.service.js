@@ -34,14 +34,10 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserService = void 0;
 const common_1 = require("@nestjs/common");
 const mongoose_1 = require("@nestjs/mongoose");
-const omit_1 = __importDefault(require("lodash/omit"));
 const mongoose_2 = require("mongoose");
 const bcrypt = __importStar(require("bcrypt"));
 const jwt_1 = require("@nestjs/jwt");
@@ -53,10 +49,10 @@ let UserService = class UserService {
     }
     async createUser(user) {
         try {
-            const { password } = user;
+            const { password, ...rest } = user;
             const hashedPwd = await bcrypt.hash(password, 10);
             const newUser = new this.userModel({
-                ...(0, omit_1.default)(user, ['password']),
+                ...rest,
                 password: hashedPwd,
             });
             const savedUser = await newUser.save();
@@ -68,8 +64,7 @@ let UserService = class UserService {
         }
         catch (e) {
             console.error(`[createUser] catch:`, e);
-            const msg = (0, error_1.getErrorMessage)(e);
-            return { error: msg };
+            return (0, error_1.getErrorMessage)(e);
         }
     }
     async findOne(email) {

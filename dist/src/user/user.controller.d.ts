@@ -4,14 +4,10 @@ export declare class UserController {
     private readonly userService;
     constructor(userService: UserService);
     signUpUser(user: CreateUserDTO): Promise<{
-        token: string;
-        error?: undefined;
+        error: string;
+        message: string;
     } | {
-        error: {
-            error: string;
-            message: string;
-        };
-        token?: undefined;
+        token: string;
     }>;
     signInUser(user: LoginUserDTO): Promise<{
         token: string;
