@@ -34,6 +34,9 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserService = void 0;
 const common_1 = require("@nestjs/common");
@@ -42,6 +45,7 @@ const mongoose_2 = require("mongoose");
 const bcrypt = __importStar(require("bcrypt"));
 const jwt_1 = require("@nestjs/jwt");
 const error_1 = require("../../utils/error");
+const logger_1 = __importDefault(require("../../utils/logger"));
 const JWT_EXPIRES_IN = 60 * 2;
 let UserService = class UserService {
     constructor(userModel, jwtService) {
@@ -64,21 +68,28 @@ let UserService = class UserService {
             return res.status(201).json({ token, expiresIn: JWT_EXPIRES_IN });
         }
         catch (e) {
-            console.error(`[createUser] catch:`, e);
+            logger_1.default.error(`[createUser] catch:`, e);
             return res.status(400).json((0, error_1.getErrorMessage)(e));
         }
     }
     async findOneByEmail(email) {
-        return await this.userModel.findOne({ email });
+        try {
+            return await this.userModel.findOne({ email });
+        }
+        catch (e) {
+            logger_1.default.error(`[findOneByEmail] catch:`, e);
+        }
     }
     async signInUser(user, res) {
         const { email, password } = user;
         const foundUser = await this.findOneByEmail(email);
         if (!foundUser) {
+            logger_1.default.error(`[signInUser]: User [email: ${email}] does not exist!`);
             throw new common_1.UnauthorizedException('Email does not exist!');
         }
         const isMatch = await bcrypt.compare(password, foundUser.password);
         if (!isMatch) {
+            logger_1.default.error('[signInUser]: Password is incorrect!');
             throw new common_1.UnauthorizedException('Password is incorrect!');
         }
         const payload = { email: foundUser.email, name: foundUser.name };

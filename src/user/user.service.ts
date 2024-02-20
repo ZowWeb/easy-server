@@ -8,6 +8,7 @@ import { UserModel } from './user.model'
 import { JwtService } from '@nestjs/jwt'
 import { getErrorMessage } from 'utils/error'
 import { Response } from 'express'
+import logger from 'utils/logger'
 
 const JWT_EXPIRES_IN = 60 * 2
 
@@ -38,25 +39,31 @@ export class UserService {
 
       return res.status(201).json({ token, expiresIn: JWT_EXPIRES_IN })
     } catch (e) {
-      console.error(`[createUser] catch:`, e)
+      logger.error(`[createUser] catch:`, e)
 
       return res.status(400).json(getErrorMessage(e))
     }
   }
 
   async findOneByEmail(email: string): Promise<UserModel> {
-    return await this.userModel.findOne({ email })
+    try {
+      return await this.userModel.findOne({ email })
+    } catch (e) {
+      logger.error(`[findOneByEmail] catch:`, e)
+    }
   }
 
   async signInUser(user: LoginUserDTO, res: Response) {
     const { email, password } = user
     const foundUser = await this.findOneByEmail(email)
     if (!foundUser) {
+      logger.error(`[signInUser]: User [email: ${email}] does not exist!`)
       throw new UnauthorizedException('Email does not exist!')
     }
 
     const isMatch = await bcrypt.compare(password, foundUser.password)
     if (!isMatch) {
+      logger.error('[signInUser]: Password is incorrect!')
       throw new UnauthorizedException('Password is incorrect!')
     }
 
